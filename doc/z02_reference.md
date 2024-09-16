@@ -4,7 +4,7 @@
 
 参考这个知乎问答: [推荐学习 Nginx 的书？](https://www.zhihu.com/question/25056737)
 
-有如下基本图书
+有如下几本图书
 
 [深入理解Nginx模块开发与架构解析](https://item.jd.com/11877268.html)
 

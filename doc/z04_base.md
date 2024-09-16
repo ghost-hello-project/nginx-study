@@ -134,10 +134,66 @@ server {
 
 ## 反向代理
 
-### windows 下反向代理 spring boot
+### 反向代理 spring boot
 
+#### 最简单的配置
 
-### docker 环境下反向代理 spring boot
+```conf {.line-numbers}
+#允许进程数量，建议设置为cpu核心数或者auto自动检测，注意Windows服务器上虽然可以启动多个processes，但是实际只会用其中一个
+worker_processes  1; 
+
+events {
+    #单个进程最大连接数（最大连接数=连接数*进程数）
+    #根据硬件调整，和前面工作进程配合起来用，尽量大，但是别把cpu跑到100%就行。
+    worker_connections  1024;
+}
+
+http {
+    #文件扩展名与文件类型映射表(是conf目录下的一个文件)
+    include       mime.types;
+    #默认文件类型，如果mime.types预先定义的类型没匹配上，默认使用二进制流的方式传输
+    default_type  application/octet-stream;
+
+    # sendfile指令指定nginx是否调用sendfile 函数（zero copy 方式）来输出文件
+    # 对于普通应用，必须设为on。如果用来进行下载等应用磁盘IO重负载应用，可设置为off，
+    # 以平衡磁盘与网络IO处理速度。
+    sendfile        on;
+    
+     #长连接超时时间，单位是秒
+    keepalive_timeout  65;
+
+    # spring boot 后端
+    server {
+        listen 80;
+        server_name api.thresh-dev.com;
+
+        location / {
+            proxy_pass http://localhost:8092;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
+}
+```
+
+#### 关于 docker 反向代理 spring boot 的几个问题
+
+1. 本地开发环境如何反向代理
+```
+proxy_pass http://host.docker.internal:8092;
+```
+
+2. 非本地环境如何反向代理
+**在同一个网络**
+```
+proxy_pass 服务名;
+```
+
+**不在同一个网略**
+```
+proxy_pass http://ip:端口;
+```
 
 ## 负载均衡
 
